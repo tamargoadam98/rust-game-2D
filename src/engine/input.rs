@@ -24,19 +24,8 @@ impl Input {
         self.moving_down = window.is_key_down(Key::S) || window.is_key_down(Key::Down);
     }
 
-    pub fn is_moving_left(&self) -> bool {
-        self.moving_left
-    }
-
-    pub fn is_moving_right(&self) -> bool {
-        self.moving_right
-    }
-
-    pub fn is_moving_up(&self) -> bool {
-        self.moving_up
-    }
-
-    pub fn is_moving_down(&self) -> bool {
-        self.moving_down
-    }
+    pub fn is_moving_left(&self) -> bool { self.moving_left }
+    pub fn is_moving_right(&self) -> bool { self.moving_right }
+    pub fn is_moving_up(&self) -> bool { self.moving_up }
+    pub fn is_moving_down(&self) -> bool { self.moving_down }
 }

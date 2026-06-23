@@ -1,13 +1,18 @@
+pub mod color;
+pub mod config;
+pub mod game_context;
+pub mod input;
+pub mod renderer;
+
 use std::time::Instant;
 
-use crate::color;
-use crate::config::Config;
-use crate::enemy::Enemy;
-use crate::entity::Entity;
-use crate::game_context::GameContext;
-use crate::input::Input;
-use crate::player::Player;
-use crate::renderer::{Renderable, Renderer};
+use crate::entities::enemy::Enemy;
+use crate::entities::entity::Entity;
+use crate::entities::player::Player;
+use self::config::Config;
+use self::game_context::GameContext;
+use self::input::Input;
+use self::renderer::{Renderable, Renderer};
 
 pub fn run() {
     println!("Game start");
@@ -19,12 +24,8 @@ pub fn run() {
 
     let mut entities: Vec<Box<dyn Entity>> = Vec::new();
     let mut player = Player::new((config.width / 2) as f32, (config.height / 2) as f32, 200.0, 50.0);
-    entities.push(Box::new(
-        Enemy::new(0.0, 0.0, 100.0, 25.0)
-    ));
-    entities.push(Box::new(
-        Enemy::new((config.width - 25) as f32, 0.0, 100.0, 25.0)
-    ));
+    entities.push(Box::new(Enemy::new(0.0, 0.0, 100.0, 25.0)));
+    entities.push(Box::new(Enemy::new((config.width - 25) as f32, 0.0, 100.0, 25.0)));
 
     while renderer.is_open() {
         input.poll(renderer.window());

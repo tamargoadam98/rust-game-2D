@@ -25,7 +25,7 @@ impl Renderer {
     }
 
     pub fn is_open(&self) -> bool {
-       self.window.is_open() && !self.window.is_key_down(Key::Escape)
+        self.window.is_open() && !self.window.is_key_down(Key::Escape)
     }
 
     pub fn window(&self) -> &Window {

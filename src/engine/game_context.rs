@@ -1,4 +1,5 @@
-use crate::{config::Config, input::Input, player};
+use super::config::Config;
+use super::input::Input;
 
 pub struct GameContext<'a> {
     pub config: &'a Config,
@@ -10,6 +11,6 @@ pub struct GameContext<'a> {
 
 impl<'a> GameContext<'a> {
     pub fn new(config: &'a Config, input: &'a Input, dt: f32, player_x: f32, player_y: f32) -> Self {
-        Self { config, input, dt,  player_x, player_y }
+        Self { config, input, dt, player_x, player_y }
     }
 }
