@@ -1,4 +1,5 @@
 mod color;
+mod config;
 mod engine;
 mod input;
 mod player;
