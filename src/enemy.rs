@@ -1,13 +1,13 @@
 use crate::{color, config::Config, entity::Entity, game_context::GameContext, input::Input, renderer::{Renderable, Renderer}};
 
-pub struct Player {
+pub struct Enemy {
     pub x: f32,
     pub y: f32,
     pub speed: f32,
     pub box_size: f32,
 }
 
-impl Player {
+impl Enemy {
     pub fn new(x: f32, y: f32, speed: f32, box_size: f32) -> Self {
         Self {
             x,
@@ -18,19 +18,19 @@ impl Player {
     }
 }
 
-impl Entity for Player {
+impl Entity for Enemy {
     fn update(&mut self, ctx: &GameContext) {
         let dist = self.speed * ctx.dt;
-        if ctx.input.is_moving_left() {
+        if ctx.player_x < self.x {
             self.x -= dist;
         }
-        if ctx.input.is_moving_right() {
+        if ctx.player_x > self.x {
             self.x += dist;
         }
-        if ctx.input.is_moving_up() {
+        if ctx.player_y < self.y {
             self.y -= dist;
         }
-        if ctx.input.is_moving_down() {
+        if ctx.player_y > self.y {
             self.y += dist;
         }
 
@@ -39,12 +39,12 @@ impl Entity for Player {
     }
 }
 
-impl Renderable for Player {
+impl Renderable for Enemy {
     fn draw(&self, renderer: &mut Renderer) {
         let x_draw = self.x.round() as usize;
         let y_draw = self.y.round() as usize;
 
         // Draw a simple box that can move around the screen
-        renderer.draw_rect(x_draw, y_draw, self.box_size as usize, self.box_size as usize, color::GREEN);
+        renderer.draw_rect(x_draw, y_draw, self.box_size as usize, self.box_size as usize, color::RED);
     }
 }
