@@ -41,9 +41,18 @@ impl Renderer {
     }
 
     pub fn draw_rect(&mut self, x: usize, y: usize, width: usize, height: usize, color: u32) {
-        for y_coord in y - height..y {
-            for x_coord in x..x + width {
-                self.draw_pixel(x_coord, y_coord, color);
+        let half_w = (width / 2) as i32;
+        let half_h = (height / 2) as i32;
+        let cx = x as i32;
+        let cy = y as i32;
+
+        for y_coord in cy - half_h..cy + half_h {
+            for x_coord in cx - half_w..cx + half_w {
+                if x_coord >= 0 && y_coord >= 0
+                    && (x_coord as usize) < self.width
+                    && (y_coord as usize) < self.height {
+                    self.draw_pixel(x_coord as usize, y_coord as usize, color);
+                }
             }
         }
     }
