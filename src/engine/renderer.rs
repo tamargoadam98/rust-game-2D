@@ -1,5 +1,6 @@
 use minifb::{Key, Window, WindowOptions};
 
+/// Implemented by anything that knows how to draw itself to the pixel buffer.
 pub trait Renderable {
     fn draw(&self, renderer: &mut Renderer);
 }
@@ -40,6 +41,7 @@ impl Renderer {
         self.buffer[y * self.width + x] = color
     }
 
+    /// Draws a rectangle centered on `(x, y)`. Clips silently at screen edges.
     pub fn draw_rect(&mut self, x: usize, y: usize, width: usize, height: usize, color: u32) {
         let half_w = (width / 2) as i32;
         let half_h = (height / 2) as i32;
@@ -57,6 +59,7 @@ impl Renderer {
         }
     }
 
+    /// Flushes the pixel buffer to the window. Call once at the end of each frame.
     pub fn present(&mut self) {
         self.window.update_with_buffer(&self.buffer, self.width, self.height).unwrap();
     }

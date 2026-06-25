@@ -1,3 +1,4 @@
+/// Axis-aligned bounding box used for collision detection. Edges are computed from a center position.
 pub struct Bounds {
     pub id: u32,
     pub left: f32,
@@ -17,6 +18,7 @@ impl Bounds {
         }
     }
 
+    /// Returns true if this overlaps `bounds`. Entities with the same ID never collide.
     pub fn is_collision(&self, bounds: &Bounds) -> bool {
         self.id != bounds.id &&
         self.left < bounds.right &&

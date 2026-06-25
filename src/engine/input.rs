@@ -17,6 +17,7 @@ impl Input {
         }
     }
 
+    /// Captures the current key state. Call once per frame before any entity updates.
     pub fn poll(&mut self, window: &Window) {
         self.moving_left = window.is_key_down(Key::A) || window.is_key_down(Key::Left);
         self.moving_right = window.is_key_down(Key::D) || window.is_key_down(Key::Right);
