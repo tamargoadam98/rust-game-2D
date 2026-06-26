@@ -38,7 +38,10 @@ impl Renderer {
     }
 
     pub fn draw_pixel(&mut self, x: usize, y: usize, color: u32) {
-        self.buffer[y * self.width + x] = color
+        if (x as usize) < self.width
+            && (y as usize) < self.height {
+            self.buffer[y * self.width + x] = color
+        }
     }
 
     /// Draws a rectangle centered on `(x, y)`. Clips silently at screen edges.
@@ -50,11 +53,20 @@ impl Renderer {
 
         for y_coord in cy - half_h..cy + half_h {
             for x_coord in cx - half_w..cx + half_w {
-                if x_coord >= 0 && y_coord >= 0
-                    && (x_coord as usize) < self.width
-                    && (y_coord as usize) < self.height {
+                if x_coord >= 0 && y_coord >= 0 {
                     self.draw_pixel(x_coord as usize, y_coord as usize, color);
                 }
+            }
+        }
+    }
+
+    /// Blits (block-transfers) a tile's pixel buffer to screen position `(x, y)` in pixel coordinates.
+    pub fn blit_tile(&mut self, x: usize, y: usize, pixels: &[u32], tile_size: usize) {
+        let mut i = 0;
+        for y_coord in y .. y + tile_size {
+            for x_coord in x .. x + tile_size {
+                self.draw_pixel(x_coord, y_coord, pixels[i]);
+                i += 1;
             }
         }
     }

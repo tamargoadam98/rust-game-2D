@@ -1,0 +1,10 @@
+[
+    {
+        "id": "background",
+        "file": "assets/sheets/test.png",
+        "tile_size": 32,
+        "tile_configs": [
+            { "name": "stars", "x": 0, "y": 0 }
+        ]
+    }
+]

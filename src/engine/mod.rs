@@ -6,9 +6,11 @@ pub mod renderer;
 
 use std::time::Instant;
 
+use crate::assets::tileset_manager::TilesetManager;
 use crate::entities::enemy::Enemy;
 use crate::entities::entity::Entity;
 use crate::entities::player::Player;
+use crate::world::tilemap::Tilemap;
 use self::config::Config;
 use self::game_context::GameContext;
 use self::input::Input;
@@ -21,7 +23,17 @@ pub fn run() {
     let mut renderer = Renderer::new(config.title, config.width, config.height);
     let mut input = Input::new();
     let mut last_frame = Instant::now();
-    
+
+    let mut tileset_manager = TilesetManager::new();
+    let tileset = tileset_manager.tilesets.remove("background").unwrap();
+    let tile_size = tileset.tile_size;
+    let mut tilemap = Tilemap::new(
+        tileset, 
+        config.width / tile_size, 
+        config.height / tile_size
+    );
+    tilemap.fill("stars");
+
     let mut entities: Vec<Box<dyn Entity>> = Vec::new();
     let mut player = Player::new((config.width / 2) as f32, (config.height / 2) as f32, 200.0, 50.0);
     entities.push(Box::new(Enemy::new(0.0, 0.0, 100.0, 25.0)));
@@ -31,6 +43,8 @@ pub fn run() {
         input.poll(renderer.window());
 
         renderer.clear(color::BLACK);
+
+        tilemap.draw(&mut renderer);
 
         let now = Instant::now();
         let dt = (now - last_frame).as_secs_f32();

@@ -7,8 +7,8 @@ pub struct Config {
 impl Config {
     pub fn new() -> Self {
         Self {
-            width: 640,
-            height: 360,
+            width: 1280,
+            height: 800,
             title: "Simple Engine",
         }
     }
