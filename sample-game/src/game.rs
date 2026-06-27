@@ -17,21 +17,29 @@ pub struct MyGame {
 impl MyGame {
     pub fn new(config: Config) -> Self {
         let mut tileset_manager = TilesetManager::new("assets/sheets/config.json");
+        // Fetch background tile map
         let tileset = tileset_manager.tilesets.remove("background").unwrap();
         let tile_size = tileset.tile_size;
         let mut tilemap =
             Tilemap::new(tileset, config.width / tile_size, config.height / tile_size);
         tilemap.fill("stars");
 
+        // Fetch sprite sheet
+        let mut spritesheet = tileset_manager.tilesets.remove("ships").unwrap();
+        let player_sprite = spritesheet.tiles.remove("player").unwrap();
+        let enemy_sprite = spritesheet.tiles.remove("enemy").unwrap();
+
+        // Setup entities
         let player = Player::new(
             (config.width / 2) as f32,
             (config.height / 2) as f32,
             200.0,
-            50.0,
+            128.0,
+            player_sprite,
         );
         let enemies = vec![
-            Enemy::new(0.0, 0.0, 100.0, 25.0),
-            Enemy::new((config.width - 25) as f32, 0.0, 100.0, 25.0),
+            Enemy::new(0.0, 0.0, 100.0, 64.0, enemy_sprite.clone()),
+            Enemy::new((config.width - 25) as f32, 0.0, 100.0, 64.0, enemy_sprite),
         ];
 
         Self {

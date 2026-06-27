@@ -49,10 +49,11 @@ impl Renderable for Tilemap {
                 if !tile_id.is_empty()
                     && let Some(tile) = self.tileset.tiles.get(tile_id)
                 {
-                    renderer.blit_tile(
+                    renderer.blit_pixels(
                         x * self.tileset.tile_size,
                         y * self.tileset.tile_size,
                         &tile.pixels,
+                        self.tileset.tile_size,
                         self.tileset.tile_size,
                     );
                 }

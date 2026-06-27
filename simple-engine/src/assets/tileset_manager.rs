@@ -65,7 +65,7 @@ impl TilesetManager {
                 tile_config.y,
                 tile_size,
             );
-            tilemap.insert(tile_config.name.clone(), Tile { pixels });
+            tilemap.insert(tile_config.name.clone(), Tile { pixels, size: tile_size });
         }
         tilemap
     }

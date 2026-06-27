@@ -1,4 +1,4 @@
-use crate::color;
+use simple_engine::assets::tileset::Tile;
 use simple_engine::engine::game_context::GameContext;
 use simple_engine::engine::renderer::{Renderable, Renderer};
 use simple_engine::entities::bounds::Bounds;
@@ -10,16 +10,18 @@ pub struct Enemy {
     pub y: f32,
     speed: f32,
     box_size: f32,
+    sprite: Tile,
 }
 
 impl Enemy {
-    pub fn new(x: f32, y: f32, speed: f32, box_size: f32) -> Self {
+    pub fn new(x: f32, y: f32, speed: f32, box_size: f32, sprite: Tile) -> Self {
         Self {
             id: Self::next_id(),
             x,
             y,
             speed,
             box_size,
+            sprite: sprite.scale(box_size as u32),
         }
     }
 
@@ -65,12 +67,12 @@ impl Entity for Enemy {
 
 impl Renderable for Enemy {
     fn draw(&self, renderer: &mut Renderer) {
-        renderer.draw_rect(
+        renderer.blit_pixels_centered(
             self.x.round() as usize,
             self.y.round() as usize,
-            self.box_size as usize,
-            self.box_size as usize,
-            color::RED,
+            &self.sprite.pixels,
+            self.sprite.size,
+            self.sprite.size,
         );
     }
 }

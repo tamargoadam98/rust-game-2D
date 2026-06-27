@@ -65,35 +65,28 @@ impl Renderer {
         }
     }
 
-    /// Draws a rectangle centered on `(x, y)`. Clips silently at screen edges.
-    pub fn draw_rect(&mut self, x: usize, y: usize, width: usize, height: usize, color: u32) {
-        let half_w = (width / 2) as i32;
-        let half_h = (height / 2) as i32;
-        let cx = x as i32;
-        let cy = y as i32;
-
-        for y_coord in cy - half_h..cy + half_h {
-            for x_coord in cx - half_w..cx + half_w {
-                if x_coord >= 0 && y_coord >= 0 {
-                    self.draw_pixel(x_coord as usize, y_coord as usize, color);
-                }
-            }
-        }
+    /// Blits an RGBA pixel buffer with `(x, y)` as the top-left corner.
+    pub fn blit_pixels(&mut self, x: usize, y: usize, pixels: &[u8], width: usize, height: usize) {
+        self.blit_raw(x as i32, y as i32, width, height, pixels);
     }
 
-    /// Blits a tile's RGBA pixel buffer to screen position `(x, y)`.
-    pub fn blit_tile(&mut self, x: usize, y: usize, pixels: &[u8], tile_size: usize) {
-        for row in 0..tile_size {
-            for col in 0..tile_size {
-                let i = (row * tile_size + col) * 4;
-                self.draw_pixel_rgba(
-                    x + col,
-                    y + row,
-                    pixels[i],
-                    pixels[i + 1],
-                    pixels[i + 2],
-                    pixels[i + 3],
-                );
+    /// Blits an RGBA pixel buffer centered on `(x, y)`.
+    pub fn blit_pixels_centered(&mut self, x: usize, y: usize, pixels: &[u8], width: usize, height: usize) {
+        let start_x = x as i32 - (width / 2) as i32;
+        let start_y = y as i32 - (height / 2) as i32;
+        self.blit_raw(start_x, start_y, width, height, pixels);
+    }
+
+    fn blit_raw(&mut self, start_x: i32, start_y: i32, width: usize, height: usize, pixels: &[u8]) {
+        let mut i = 0;
+        for row in 0..height as i32 {
+            for col in 0..width as i32 {
+                let x = start_x + col;
+                let y = start_y + row;
+                if x >= 0 && y >= 0 {
+                    self.draw_pixel_rgba(x as usize, y as usize, pixels[i], pixels[i + 1], pixels[i + 2], pixels[i + 3]);
+                }
+                i += 4;
             }
         }
     }
