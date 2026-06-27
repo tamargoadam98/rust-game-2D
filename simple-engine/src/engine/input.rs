@@ -1,5 +1,6 @@
 use minifb::{Key, Window};
 
+#[derive(Default)]
 pub struct Input {
     moving_left: bool,
     moving_right: bool,
@@ -9,12 +10,7 @@ pub struct Input {
 
 impl Input {
     pub fn new() -> Self {
-        Self {
-            moving_left: false,
-            moving_right: false,
-            moving_up: false,
-            moving_down: false,
-        }
+        Self::default()
     }
 
     /// Captures the current key state. Call once per frame before any entity updates.
@@ -25,8 +21,16 @@ impl Input {
         self.moving_down = window.is_key_down(Key::S) || window.is_key_down(Key::Down);
     }
 
-    pub fn is_moving_left(&self) -> bool { self.moving_left }
-    pub fn is_moving_right(&self) -> bool { self.moving_right }
-    pub fn is_moving_up(&self) -> bool { self.moving_up }
-    pub fn is_moving_down(&self) -> bool { self.moving_down }
+    pub fn is_moving_left(&self) -> bool {
+        self.moving_left
+    }
+    pub fn is_moving_right(&self) -> bool {
+        self.moving_right
+    }
+    pub fn is_moving_up(&self) -> bool {
+        self.moving_up
+    }
+    pub fn is_moving_down(&self) -> bool {
+        self.moving_down
+    }
 }

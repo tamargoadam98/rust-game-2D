@@ -1,8 +1,8 @@
+use crate::color;
 use simple_engine::engine::game_context::GameContext;
 use simple_engine::engine::renderer::{Renderable, Renderer};
 use simple_engine::entities::bounds::Bounds;
 use simple_engine::entities::entity::Entity;
-use crate::color;
 
 pub struct Enemy {
     pub id: u32,
@@ -14,17 +14,37 @@ pub struct Enemy {
 
 impl Enemy {
     pub fn new(x: f32, y: f32, speed: f32, box_size: f32) -> Self {
-        Self { id: Self::next_id(), x, y, speed, box_size }
+        Self {
+            id: Self::next_id(),
+            x,
+            y,
+            speed,
+            box_size,
+        }
     }
 
-    pub fn update(&mut self, player_x: f32, player_y: f32, ctx: &GameContext, entity_bounds: &[Bounds]) {
+    pub fn update(
+        &mut self,
+        player_x: f32,
+        player_y: f32,
+        ctx: &GameContext,
+        entity_bounds: &[Bounds],
+    ) {
         let mut x = self.x;
         let mut y = self.y;
         let step = self.speed * ctx.dt;
-        if player_x < self.x { x -= step; }
-        if player_x > self.x { x += step; }
-        if player_y < self.y { y -= step; }
-        if player_y > self.y { y += step; }
+        if player_x < self.x {
+            x -= step;
+        }
+        if player_x > self.x {
+            x += step;
+        }
+        if player_y < self.y {
+            y -= step;
+        }
+        if player_y > self.y {
+            y += step;
+        }
 
         x = x.clamp(0.0, ctx.config.width as f32 - self.box_size);
         y = y.clamp(self.box_size, ctx.config.height as f32);
@@ -45,6 +65,12 @@ impl Entity for Enemy {
 
 impl Renderable for Enemy {
     fn draw(&self, renderer: &mut Renderer) {
-        renderer.draw_rect(self.x.round() as usize, self.y.round() as usize, self.box_size as usize, self.box_size as usize, color::RED);
+        renderer.draw_rect(
+            self.x.round() as usize,
+            self.y.round() as usize,
+            self.box_size as usize,
+            self.box_size as usize,
+            color::RED,
+        );
     }
 }

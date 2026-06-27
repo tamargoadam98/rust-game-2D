@@ -38,8 +38,7 @@ impl Renderer {
     }
 
     pub fn draw_pixel(&mut self, x: usize, y: usize, color: u32) {
-        if (x as usize) < self.width
-            && (y as usize) < self.height {
+        if x < self.width && y < self.height {
             self.buffer[y * self.width + x] = color
         }
     }
@@ -63,8 +62,8 @@ impl Renderer {
     /// Blits (block-transfers) a tile's pixel buffer to screen position `(x, y)` in pixel coordinates.
     pub fn blit_tile(&mut self, x: usize, y: usize, pixels: &[u32], tile_size: usize) {
         let mut i = 0;
-        for y_coord in y .. y + tile_size {
-            for x_coord in x .. x + tile_size {
+        for y_coord in y..y + tile_size {
+            for x_coord in x..x + tile_size {
                 self.draw_pixel(x_coord, y_coord, pixels[i]);
                 i += 1;
             }
@@ -73,6 +72,8 @@ impl Renderer {
 
     /// Flushes the pixel buffer to the window. Call once at the end of each frame.
     pub fn present(&mut self) {
-        self.window.update_with_buffer(&self.buffer, self.width, self.height).unwrap();
+        self.window
+            .update_with_buffer(&self.buffer, self.width, self.height)
+            .unwrap();
     }
 }

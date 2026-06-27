@@ -5,12 +5,18 @@ pub struct Config {
     pub title: &'static str,
 }
 
-impl Config {
-    pub fn new() -> Self {
+impl Default for Config {
+    fn default() -> Self {
         Self {
             width: 1280,
             height: 800,
             title: "Simple Engine",
         }
+    }
+}
+
+impl Config {
+    pub fn new() -> Self {
+        Self::default()
     }
 }
