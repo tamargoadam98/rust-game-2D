@@ -1,4 +1,4 @@
-use minifb::{Key, Window};
+use winit::keyboard::{Key, NamedKey};
 
 #[derive(Default)]
 pub struct Input {
@@ -13,12 +13,32 @@ impl Input {
         Self::default()
     }
 
-    /// Captures the current key state. Call once per frame before any entity updates.
-    pub fn poll(&mut self, window: &Window) {
-        self.moving_left = window.is_key_down(Key::A) || window.is_key_down(Key::Left);
-        self.moving_right = window.is_key_down(Key::D) || window.is_key_down(Key::Right);
-        self.moving_up = window.is_key_down(Key::W) || window.is_key_down(Key::Up);
-        self.moving_down = window.is_key_down(Key::S) || window.is_key_down(Key::Down);
+    pub fn key_down(&mut self, key: &Key) {
+        match key {
+            Key::Character(c) if c.as_str() == "a" => self.moving_left = true,
+            Key::Character(c) if c.as_str() == "d" => self.moving_right = true,
+            Key::Character(c) if c.as_str() == "w" => self.moving_up = true,
+            Key::Character(c) if c.as_str() == "s" => self.moving_down = true,
+            Key::Named(NamedKey::ArrowLeft) => self.moving_left = true,
+            Key::Named(NamedKey::ArrowRight) => self.moving_right = true,
+            Key::Named(NamedKey::ArrowUp) => self.moving_up = true,
+            Key::Named(NamedKey::ArrowDown) => self.moving_down = true,
+            _ => {}
+        }
+    }
+
+    pub fn key_up(&mut self, key: &Key) {
+        match key {
+            Key::Character(c) if c.as_str() == "a" => self.moving_left = false,
+            Key::Character(c) if c.as_str() == "d" => self.moving_right = false,
+            Key::Character(c) if c.as_str() == "w" => self.moving_up = false,
+            Key::Character(c) if c.as_str() == "s" => self.moving_down = false,
+            Key::Named(NamedKey::ArrowLeft) => self.moving_left = false,
+            Key::Named(NamedKey::ArrowRight) => self.moving_right = false,
+            Key::Named(NamedKey::ArrowUp) => self.moving_up = false,
+            Key::Named(NamedKey::ArrowDown) => self.moving_down = false,
+            _ => {}
+        }
     }
 
     pub fn is_moving_left(&self) -> bool {

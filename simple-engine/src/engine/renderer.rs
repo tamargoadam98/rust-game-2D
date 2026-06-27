@@ -1,45 +1,67 @@
-use minifb::{Key, Window, WindowOptions};
+use pixels::Pixels;
 
-/// Implemented by anything that knows how to draw itself to the pixel buffer.
 pub trait Renderable {
     fn draw(&self, renderer: &mut Renderer);
 }
 
 pub struct Renderer {
-    buffer: Vec<u32>,
+    pixels: Pixels<'static>,
     pub width: usize,
     pub height: usize,
-    window: Window,
 }
 
 impl Renderer {
-    pub fn new(title: &str, width: usize, height: usize) -> Self {
-        let window = Window::new(title, width, height, WindowOptions::default())
-            .unwrap_or_else(|e| panic!("Failed to create window: {}", e));
-
+    pub(crate) fn new(pixels: Pixels<'static>, width: usize, height: usize) -> Self {
         Self {
-            buffer: vec![0; width * height],
+            pixels,
             width,
             height,
-            window,
         }
     }
 
-    pub fn is_open(&self) -> bool {
-        self.window.is_open() && !self.window.is_key_down(Key::Escape)
-    }
-
-    pub fn window(&self) -> &Window {
-        &self.window
-    }
-
     pub fn clear(&mut self, color: u32) {
-        self.buffer.fill(color)
+        let [r, g, b] = rgb_bytes(color);
+        for px in self.pixels.frame_mut().chunks_exact_mut(4) {
+            px[0] = r;
+            px[1] = g;
+            px[2] = b;
+            px[3] = 0xff;
+        }
     }
 
     pub fn draw_pixel(&mut self, x: usize, y: usize, color: u32) {
         if x < self.width && y < self.height {
-            self.buffer[y * self.width + x] = color
+            let i = (y * self.width + x) * 4;
+            let [r, g, b] = rgb_bytes(color);
+            let frame = self.pixels.frame_mut();
+            frame[i] = r;
+            frame[i + 1] = g;
+            frame[i + 2] = b;
+            frame[i + 3] = 0xff;
+        }
+    }
+
+    /// Draws a pixel blended over whatever is already in the buffer.
+    /// Uses standard "src over dst" alpha compositing:
+    ///   out = (src * a + dst * (255 - a)) / 255
+    pub fn draw_pixel_rgba(&mut self, x: usize, y: usize, r: u8, g: u8, b: u8, a: u8) {
+        if a == 0 || x >= self.width || y >= self.height {
+            return;
+        }
+        let i = (y * self.width + x) * 4;
+        let frame = self.pixels.frame_mut();
+        if a == 255 {
+            frame[i] = r;
+            frame[i + 1] = g;
+            frame[i + 2] = b;
+            frame[i + 3] = 0xff;
+        } else {
+            let a = a as u32;
+            let inv = 255 - a;
+            frame[i] = ((r as u32 * a + frame[i] as u32 * inv) / 255) as u8;
+            frame[i + 1] = ((g as u32 * a + frame[i + 1] as u32 * inv) / 255) as u8;
+            frame[i + 2] = ((b as u32 * a + frame[i + 2] as u32 * inv) / 255) as u8;
+            frame[i + 3] = 0xff;
         }
     }
 
@@ -59,21 +81,32 @@ impl Renderer {
         }
     }
 
-    /// Blits (block-transfers) a tile's pixel buffer to screen position `(x, y)` in pixel coordinates.
-    pub fn blit_tile(&mut self, x: usize, y: usize, pixels: &[u32], tile_size: usize) {
-        let mut i = 0;
-        for y_coord in y..y + tile_size {
-            for x_coord in x..x + tile_size {
-                self.draw_pixel(x_coord, y_coord, pixels[i]);
-                i += 1;
+    /// Blits a tile's RGBA pixel buffer to screen position `(x, y)`.
+    pub fn blit_tile(&mut self, x: usize, y: usize, pixels: &[u8], tile_size: usize) {
+        for row in 0..tile_size {
+            for col in 0..tile_size {
+                let i = (row * tile_size + col) * 4;
+                self.draw_pixel_rgba(
+                    x + col,
+                    y + row,
+                    pixels[i],
+                    pixels[i + 1],
+                    pixels[i + 2],
+                    pixels[i + 3],
+                );
             }
         }
     }
 
-    /// Flushes the pixel buffer to the window. Call once at the end of each frame.
-    pub fn present(&mut self) {
-        self.window
-            .update_with_buffer(&self.buffer, self.width, self.height)
-            .unwrap();
+    pub(crate) fn present(&mut self) {
+        self.pixels.render().unwrap();
     }
+}
+
+fn rgb_bytes(color: u32) -> [u8; 3] {
+    [
+        ((color >> 16) & 0xFF) as u8,
+        ((color >> 8) & 0xFF) as u8,
+        (color & 0xFF) as u8,
+    ]
 }

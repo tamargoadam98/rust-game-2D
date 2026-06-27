@@ -53,40 +53,36 @@ impl TilesetManager {
 
         let rgba = img.to_rgba8();
         let image_width = rgba.width() as usize;
-
-        let rgb: Vec<u32> = rgba
-            .pixels()
-            .map(|pixel| {
-                let r = pixel[0] as u32;
-                let g = pixel[1] as u32;
-                let b = pixel[2] as u32;
-                (r << 16) | (g << 8) | b // Pack into 0xRRGGBB (ignoring alpha)
-            })
-            .collect();
+        let rgba_bytes = rgba.into_raw(); // raw RGBA bytes, 4 per pixel
 
         let mut tilemap = HashMap::new();
 
         for tile_config in tile_configs {
-            let pixels =
-                Self::extract_tile(&rgb, image_width, tile_config.x, tile_config.y, tile_size);
+            let pixels = Self::extract_tile(
+                &rgba_bytes,
+                image_width,
+                tile_config.x,
+                tile_config.y,
+                tile_size,
+            );
             tilemap.insert(tile_config.name.clone(), Tile { pixels });
         }
         tilemap
     }
 
-    /// Slices a tile at tile coordinates `(tx, ty)` out of a flat row-major pixel buffer.
+    /// Slices a tile at tile coordinates `(tx, ty)` out of a flat row-major RGBA byte buffer.
     fn extract_tile(
-        rgb: &[u32],
+        rgba_bytes: &[u8],
         file_width: usize,
         tx: usize,
         ty: usize,
         tile_size: usize,
-    ) -> Vec<u32> {
-        let mut pixels = Vec::with_capacity(tile_size * tile_size);
+    ) -> Vec<u8> {
+        let mut pixels = Vec::with_capacity(tile_size * tile_size * 4);
         for row in 0..tile_size {
             let pixel_y = ty * tile_size + row;
-            let start = pixel_y * file_width + tx * tile_size;
-            pixels.extend_from_slice(&rgb[start..start + tile_size]);
+            let start = (pixel_y * file_width + tx * tile_size) * 4;
+            pixels.extend_from_slice(&rgba_bytes[start..start + tile_size * 4]);
         }
         pixels
     }
