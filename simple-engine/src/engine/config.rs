@@ -1,3 +1,4 @@
+#[derive(Copy, Clone)]
 pub struct Config {
     pub width: usize,
     pub height: usize,

@@ -6,18 +6,17 @@ use crate::assets::tileset_config::{TileConfig, TilesetConfig};
 use crate::assets::tileset::{Tile, Tileset};
 
 
-/// Loads tilesets from `assets/sheets/config.json` relative to the working directory.
 pub struct TilesetManager {
     pub tilesets: HashMap<String, Tileset>
 }
 
 impl TilesetManager {
-    pub fn new() -> Self {
-        Self { tilesets: Self::load_tilesets() }
+    /// Loads tilesets from the JSON config at `config_path` relative to the working directory.
+    pub fn new(config_path: &str) -> Self {
+        Self { tilesets: Self::load_tilesets(config_path) }
     }
 
-    fn load_tilesets() -> HashMap<String, Tileset> {
-        let config_path = "assets/sheets/config.json";
+    fn load_tilesets(config_path: &str) -> HashMap<String, Tileset> {
         let config_str = std::fs::read_to_string(config_path).expect("Failed to read config.json");
         let tileset_configs: Vec<TilesetConfig> = serde_json::from_str(&config_str).expect("Failed to parse config.json");
         let mut tilesets = HashMap::<String, Tileset>::new();

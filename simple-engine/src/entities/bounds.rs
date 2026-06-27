@@ -27,7 +27,7 @@ impl Bounds {
         self.bottom > bounds.top
     }
 
-    pub fn check_collisions(&self, bounds_vec: &Vec<Bounds>) -> bool {
+    pub fn check_collisions(&self, bounds_vec: &[Bounds]) -> bool {
         for bounds in bounds_vec {
             if self.is_collision(bounds) {
                 return true;
