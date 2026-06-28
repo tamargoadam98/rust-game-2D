@@ -16,12 +16,15 @@ pub struct MyGame {
 
 impl MyGame {
     pub fn new(config: Config) -> Self {
-        let mut tileset_manager = TilesetManager::new("assets/sheets/config.json");
+        let mut tileset_manager = TilesetManager::new("assets/sheets/config.json", 64);
         // Fetch background tile map
         let tileset = tileset_manager.tilesets.remove("background").unwrap();
         let tile_size = tileset.tile_size;
-        let mut tilemap =
-            Tilemap::new(tileset, config.width / tile_size, config.height / tile_size);
+        let mut tilemap = Tilemap::new(
+            tileset,
+            config.width / tile_size + 1,
+            config.height / tile_size + 1,
+        );
         tilemap.fill("stars");
 
         // Fetch sprite sheet
@@ -52,13 +55,13 @@ impl MyGame {
 
 impl Game for MyGame {
     fn update(&mut self, ctx: &GameContext) {
-        let entity_bounds: Vec<_> = std::iter::once(self.player.get_bounds())
-            .chain(self.enemies.iter().map(|e| e.get_bounds()))
+        let entity_bounds: Vec<_> = std::iter::once(self.player.bounds())
+            .chain(self.enemies.iter().map(|e| e.bounds()))
             .collect();
 
         self.player.update(ctx, &entity_bounds);
         for enemy in &mut self.enemies {
-            enemy.update(self.player.x, self.player.y, ctx, &entity_bounds);
+            enemy.update(self.player.x(), self.player.y(), ctx, &entity_bounds);
         }
     }
 

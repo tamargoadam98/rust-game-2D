@@ -15,5 +15,5 @@ pub trait Entity: Renderable {
         NEXT_ID.fetch_add(1, Ordering::Relaxed)
     }
 
-    fn get_bounds(&self) -> Bounds;
+    fn bounds(&self) -> Bounds;
 }

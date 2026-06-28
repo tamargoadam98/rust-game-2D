@@ -11,13 +11,13 @@ pub struct TilesetManager {
 
 impl TilesetManager {
     /// Loads tilesets from the JSON config at `config_path` relative to the working directory.
-    pub fn new(config_path: &str) -> Self {
+    pub fn new(config_path: &str, display_size: usize) -> Self {
         Self {
-            tilesets: Self::load_tilesets(config_path),
+            tilesets: Self::load_tilesets(config_path, display_size),
         }
     }
 
-    fn load_tilesets(config_path: &str) -> HashMap<String, Tileset> {
+    fn load_tilesets(config_path: &str, display_size: usize) -> HashMap<String, Tileset> {
         let config_str = std::fs::read_to_string(config_path).expect("Failed to read config.json");
         let tileset_configs: Vec<TilesetConfig> =
             serde_json::from_str(&config_str).expect("Failed to parse config.json");
@@ -28,11 +28,12 @@ impl TilesetManager {
                 &tileset_config.file,
                 &tileset_config.tile_configs,
                 tileset_config.tile_size,
+                display_size,
             );
             tilesets.insert(
                 tileset_config.id,
                 Tileset {
-                    tile_size: tileset_config.tile_size,
+                    tile_size: display_size,
                     tiles: tilemap,
                 },
             );
@@ -45,6 +46,7 @@ impl TilesetManager {
         file: &str,
         tile_configs: &[TileConfig],
         tile_size: usize,
+        display_size: usize,
     ) -> HashMap<String, Tile> {
         let img = ImageReader::open(file)
             .expect("Failed to open image file.")
@@ -65,7 +67,12 @@ impl TilesetManager {
                 tile_config.y,
                 tile_size,
             );
-            tilemap.insert(tile_config.name.clone(), Tile { pixels, size: tile_size });
+            let tile = Tile {
+                pixels,
+                size: tile_size,
+            }
+            .scale(display_size as u32);
+            tilemap.insert(tile_config.name.clone(), tile);
         }
         tilemap
     }

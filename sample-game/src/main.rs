@@ -1,4 +1,3 @@
-mod color;
 mod entities;
 mod game;
 

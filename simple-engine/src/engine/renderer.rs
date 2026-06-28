@@ -29,18 +29,6 @@ impl Renderer {
         }
     }
 
-    pub fn draw_pixel(&mut self, x: usize, y: usize, color: u32) {
-        if x < self.width && y < self.height {
-            let i = (y * self.width + x) * 4;
-            let [r, g, b] = rgb_bytes(color);
-            let frame = self.pixels.frame_mut();
-            frame[i] = r;
-            frame[i + 1] = g;
-            frame[i + 2] = b;
-            frame[i + 3] = 0xff;
-        }
-    }
-
     /// Draws a pixel blended over whatever is already in the buffer.
     /// Uses standard "src over dst" alpha compositing:
     ///   out = (src * a + dst * (255 - a)) / 255
@@ -71,7 +59,14 @@ impl Renderer {
     }
 
     /// Blits an RGBA pixel buffer centered on `(x, y)`.
-    pub fn blit_pixels_centered(&mut self, x: usize, y: usize, pixels: &[u8], width: usize, height: usize) {
+    pub fn blit_pixels_centered(
+        &mut self,
+        x: usize,
+        y: usize,
+        pixels: &[u8],
+        width: usize,
+        height: usize,
+    ) {
         let start_x = x as i32 - (width / 2) as i32;
         let start_y = y as i32 - (height / 2) as i32;
         self.blit_raw(start_x, start_y, width, height, pixels);
@@ -84,7 +79,14 @@ impl Renderer {
                 let x = start_x + col;
                 let y = start_y + row;
                 if x >= 0 && y >= 0 {
-                    self.draw_pixel_rgba(x as usize, y as usize, pixels[i], pixels[i + 1], pixels[i + 2], pixels[i + 3]);
+                    self.draw_pixel_rgba(
+                        x as usize,
+                        y as usize,
+                        pixels[i],
+                        pixels[i + 1],
+                        pixels[i + 2],
+                        pixels[i + 3],
+                    );
                 }
                 i += 4;
             }
