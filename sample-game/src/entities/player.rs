@@ -5,12 +5,16 @@ use simple_engine::entities::actor::Actor;
 use simple_engine::entities::bounds::Bounds;
 use simple_engine::entities::entity::Entity;
 
+use crate::entities::direction::Direction;
+use crate::entities::directional_sprite::DirectionalSprite;
+
 pub struct Player {
     actor: Actor,
+    sprite: DirectionalSprite,
 }
 
 impl Player {
-    pub fn new(x: f32, y: f32, speed: f32, box_size: f32, sprite: Tile) -> Self {
+    pub fn new(x: f32, y: f32, speed: f32, box_size: f32, tile: Tile) -> Self {
         Self {
             actor: Actor {
                 id: Self::next_id(),
@@ -18,8 +22,8 @@ impl Player {
                 y,
                 speed,
                 box_size,
-                sprite: sprite.scale(box_size as u32),
             },
+            sprite: DirectionalSprite::new(tile, box_size, Direction::Up),
         }
     }
 
@@ -29,15 +33,19 @@ impl Player {
         let step = self.actor.speed * ctx.dt;
         if ctx.input.is_moving_left() {
             x -= step;
+            self.sprite.direction = Direction::Left;
         }
         if ctx.input.is_moving_right() {
             x += step;
+            self.sprite.direction = Direction::Right;
         }
         if ctx.input.is_moving_up() {
             y -= step;
+            self.sprite.direction = Direction::Up;
         }
         if ctx.input.is_moving_down() {
             y += step;
+            self.sprite.direction = Direction::Down;
         }
 
         x = x.clamp(
@@ -79,12 +87,10 @@ impl Entity for Player {
 
 impl Renderable for Player {
     fn draw(&self, renderer: &mut Renderer) {
-        renderer.blit_pixels_centered(
+        self.sprite.draw(
+            renderer,
             self.actor.x.round() as usize,
             self.actor.y.round() as usize,
-            &self.actor.sprite.pixels,
-            self.actor.sprite.size,
-            self.actor.sprite.size,
         );
     }
 }

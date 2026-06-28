@@ -1,4 +1,4 @@
-use crate::{assets::tileset::Tile, entities::bounds::Bounds};
+use crate::entities::bounds::Bounds;
 
 pub struct Actor {
     pub id: u32,
@@ -6,7 +6,6 @@ pub struct Actor {
     pub y: f32,
     pub speed: f32,
     pub box_size: f32,
-    pub sprite: Tile,
 }
 
 impl Actor {

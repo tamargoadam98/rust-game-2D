@@ -5,12 +5,16 @@ use simple_engine::entities::actor::Actor;
 use simple_engine::entities::bounds::Bounds;
 use simple_engine::entities::entity::Entity;
 
+use crate::entities::direction::Direction;
+use crate::entities::directional_sprite::DirectionalSprite;
+
 pub struct Enemy {
     actor: Actor,
+    sprite: DirectionalSprite,
 }
 
 impl Enemy {
-    pub fn new(x: f32, y: f32, speed: f32, box_size: f32, sprite: Tile) -> Self {
+    pub fn new(x: f32, y: f32, speed: f32, box_size: f32, tile: Tile) -> Self {
         Self {
             actor: Actor {
                 id: Self::next_id(),
@@ -18,8 +22,8 @@ impl Enemy {
                 y,
                 speed,
                 box_size,
-                sprite: sprite.scale(box_size as u32),
             },
+            sprite: DirectionalSprite::new(tile, box_size, Direction::Down),
         }
     }
 
@@ -46,6 +50,22 @@ impl Enemy {
             y += step;
         }
 
+        let dx = player_x - self.actor.x;
+        let dy = player_y - self.actor.y;
+        self.sprite.direction = if dx.abs() >= dy.abs() {
+            if dx < 0.0 {
+                Direction::Left
+            } else {
+                Direction::Right
+            }
+        } else {
+            if dy < 0.0 {
+                Direction::Up
+            } else {
+                Direction::Down
+            }
+        };
+
         x = x.clamp(0.0, ctx.config.width as f32 - self.actor.box_size);
         y = y.clamp(self.actor.box_size, ctx.config.height as f32);
 
@@ -71,12 +91,10 @@ impl Entity for Enemy {
 
 impl Renderable for Enemy {
     fn draw(&self, renderer: &mut Renderer) {
-        renderer.blit_pixels_centered(
+        self.sprite.draw(
+            renderer,
             self.actor.x.round() as usize,
             self.actor.y.round() as usize,
-            &self.actor.sprite.pixels,
-            self.actor.sprite.size,
-            self.actor.sprite.size,
         );
     }
 }
