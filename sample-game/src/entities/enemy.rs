@@ -1,7 +1,7 @@
 use simple_engine::assets::tileset::Tile;
 use simple_engine::engine::game_context::GameContext;
 use simple_engine::engine::renderer::{Renderable, Renderer};
-use simple_engine::entities::actor::Actor;
+use simple_engine::entities::actor::{Actor, ActorConfig};
 use simple_engine::entities::bounds::Bounds;
 use simple_engine::entities::entity::Entity;
 
@@ -14,15 +14,10 @@ pub struct Enemy {
 }
 
 impl Enemy {
-    pub fn new(x: f32, y: f32, speed: f32, box_size: f32, sprite: Tile, sprite_diag: Tile) -> Self {
+    pub fn new(x: f32, y: f32, config: ActorConfig, sprite: Tile, sprite_diag: Tile) -> Self {
+        let box_size = config.box_size;
         Self {
-            actor: Actor {
-                id: Self::next_id(),
-                x,
-                y,
-                speed,
-                box_size,
-            },
+            actor: Actor::new(Self::next_id(), x, y, config),
             sprite: DirectionalSprite::new(sprite, sprite_diag, box_size, Direction::Down),
         }
     }
@@ -36,23 +31,25 @@ impl Enemy {
     ) {
         let mut dx = 0.0;
         let mut dy = 0.0;
-        let step = self.actor.speed * ctx.dt;
+
         if player_x < self.actor.x - 5.0 {
-            dx -= step;
-        }
-        if player_x > self.actor.x + 5.0 {
-            dx += step;
+            dx -= 1.0;
+        } else if player_x > self.actor.x + 5.0 {
+            dx += 1.0;
         }
         if player_y < self.actor.y - 5.0 {
-            dy -= step;
+            dy -= 1.0;
+        } else if player_y > self.actor.y + 5.0 {
+            dy += 1.0;
         }
-        if player_y > self.actor.y + 5.0 {
-            dy += step;
-        }
-        self.sprite.update_direction(dx, dy);
 
-        let x = (self.x() + dx).clamp(0.0, ctx.config.width as f32 - self.actor.box_size);
-        let y = (self.y() + dy).clamp(self.actor.box_size, ctx.config.height as f32);
+        self.actor.apply_input(dx, dy, ctx.dt);
+        self.sprite.update_direction(self.actor.vx, self.actor.vy);
+
+        let x = (self.x() + self.actor.vx * ctx.dt)
+            .clamp(0.0, ctx.config.width as f32 - self.actor.box_size);
+        let y = (self.y() + self.actor.vy * ctx.dt)
+            .clamp(self.actor.box_size, ctx.config.height as f32);
 
         let new_bounds = Bounds::new(
             self.actor.id,

@@ -5,6 +5,7 @@ use simple_engine::engine::Game;
 use simple_engine::engine::config::Config;
 use simple_engine::engine::game_context::GameContext;
 use simple_engine::engine::renderer::{Renderable, Renderer};
+use simple_engine::entities::actor::ActorConfig;
 use simple_engine::entities::entity::Entity;
 use simple_engine::world::tilemap::Tilemap;
 
@@ -38,25 +39,38 @@ impl MyGame {
         let player = Player::new(
             (config.width / 2) as f32,
             (config.height / 2) as f32,
-            200.0,
-            128.0,
+            ActorConfig {
+                max_speed: 250.0,
+                acceleration: 800.0,
+                deceleration: 8.0,
+                box_size: 128.0,
+            },
             player_sprite,
             player_sprite_diag,
         );
+        let enemy_config = ActorConfig {
+            max_speed: 150.0,
+            acceleration: 900.0,
+            deceleration: 1.0,
+            box_size: 64.0,
+        };
         let enemies = vec![
             Enemy::new(
                 0.0,
                 0.0,
-                100.0,
-                64.0,
+                enemy_config,
                 enemy_sprite.clone(),
                 enemy_sprite_diag.clone(),
             ),
             Enemy::new(
                 (config.width - 25) as f32,
                 0.0,
-                100.0,
-                64.0,
+                ActorConfig {
+                    max_speed: 100.0,
+                    acceleration: 200.0,
+                    deceleration: 2.0,
+                    box_size: 64.0,
+                },
                 enemy_sprite,
                 enemy_sprite_diag,
             ),
