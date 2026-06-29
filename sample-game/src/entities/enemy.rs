@@ -14,7 +14,7 @@ pub struct Enemy {
 }
 
 impl Enemy {
-    pub fn new(x: f32, y: f32, speed: f32, box_size: f32, tile: Tile) -> Self {
+    pub fn new(x: f32, y: f32, speed: f32, box_size: f32, sprite: Tile, sprite_diag: Tile) -> Self {
         Self {
             actor: Actor {
                 id: Self::next_id(),
@@ -23,7 +23,7 @@ impl Enemy {
                 speed,
                 box_size,
             },
-            sprite: DirectionalSprite::new(tile, box_size, Direction::Down),
+            sprite: DirectionalSprite::new(sprite, sprite_diag, box_size, Direction::Down),
         }
     }
 
@@ -34,40 +34,25 @@ impl Enemy {
         ctx: &GameContext,
         entity_bounds: &[Bounds],
     ) {
-        let mut x = self.actor.x;
-        let mut y = self.actor.y;
+        let mut dx = 0.0;
+        let mut dy = 0.0;
         let step = self.actor.speed * ctx.dt;
-        if player_x < self.actor.x {
-            x -= step;
+        if player_x < self.actor.x - 5.0 {
+            dx -= step;
         }
-        if player_x > self.actor.x {
-            x += step;
+        if player_x > self.actor.x + 5.0 {
+            dx += step;
         }
-        if player_y < self.actor.y {
-            y -= step;
+        if player_y < self.actor.y - 5.0 {
+            dy -= step;
         }
-        if player_y > self.actor.y {
-            y += step;
+        if player_y > self.actor.y + 5.0 {
+            dy += step;
         }
+        self.sprite.update_direction(dx, dy);
 
-        let dx = player_x - self.actor.x;
-        let dy = player_y - self.actor.y;
-        self.sprite.direction = if dx.abs() >= dy.abs() {
-            if dx < 0.0 {
-                Direction::Left
-            } else {
-                Direction::Right
-            }
-        } else {
-            if dy < 0.0 {
-                Direction::Up
-            } else {
-                Direction::Down
-            }
-        };
-
-        x = x.clamp(0.0, ctx.config.width as f32 - self.actor.box_size);
-        y = y.clamp(self.actor.box_size, ctx.config.height as f32);
+        let x = (self.x() + dx).clamp(0.0, ctx.config.width as f32 - self.actor.box_size);
+        let y = (self.y() + dy).clamp(self.actor.box_size, ctx.config.height as f32);
 
         let new_bounds = Bounds::new(
             self.actor.id,
@@ -80,6 +65,14 @@ impl Enemy {
             self.actor.x = x;
             self.actor.y = y;
         }
+    }
+
+    pub fn x(&self) -> f32 {
+        self.actor.x
+    }
+
+    pub fn y(&self) -> f32 {
+        self.actor.y
     }
 }
 

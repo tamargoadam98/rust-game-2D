@@ -30,7 +30,9 @@ impl MyGame {
         // Fetch sprite sheet
         let mut spritesheet = tileset_manager.tilesets.remove("ships").unwrap();
         let player_sprite = spritesheet.tiles.remove("player").unwrap();
+        let player_sprite_diag = spritesheet.tiles.remove("player_diag").unwrap();
         let enemy_sprite = spritesheet.tiles.remove("enemy").unwrap();
+        let enemy_sprite_diag = spritesheet.tiles.remove("enemy_diag").unwrap();
 
         // Setup entities
         let player = Player::new(
@@ -39,10 +41,25 @@ impl MyGame {
             200.0,
             128.0,
             player_sprite,
+            player_sprite_diag,
         );
         let enemies = vec![
-            Enemy::new(0.0, 0.0, 100.0, 64.0, enemy_sprite.clone()),
-            Enemy::new((config.width - 25) as f32, 0.0, 100.0, 64.0, enemy_sprite),
+            Enemy::new(
+                0.0,
+                0.0,
+                100.0,
+                64.0,
+                enemy_sprite.clone(),
+                enemy_sprite_diag.clone(),
+            ),
+            Enemy::new(
+                (config.width - 25) as f32,
+                0.0,
+                100.0,
+                64.0,
+                enemy_sprite,
+                enemy_sprite_diag,
+            ),
         ];
 
         Self {

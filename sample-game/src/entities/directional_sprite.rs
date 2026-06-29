@@ -11,9 +11,10 @@ pub struct DirectionalSprite {
 }
 
 impl DirectionalSprite {
-    pub fn new(sprite: Tile, size: f32, default_direction: Direction) -> Self {
-        let mut tile = sprite.scale(size as u32);
+    pub fn new(sprite: Tile, sprite_diag: Tile, size: f32, default_direction: Direction) -> Self {
         let mut tilemap = HashMap::new();
+        // Get cardinal direstions
+        let mut tile = sprite.scale(size as u32);
         tilemap.insert(Direction::Up.to_string(), tile.clone());
         tile = tile.rot_90();
         tilemap.insert(Direction::Right.to_string(), tile.clone());
@@ -21,12 +22,39 @@ impl DirectionalSprite {
         tilemap.insert(Direction::Down.to_string(), tile.clone());
         tile = tile.rot_90();
         tilemap.insert(Direction::Left.to_string(), tile.clone());
+        // Get diagonal directions
+        tile = sprite_diag.scale(size as u32);
+        tilemap.insert(Direction::UpRight.to_string(), tile.clone());
+        tile = tile.rot_90();
+        tilemap.insert(Direction::DownRight.to_string(), tile.clone());
+        tile = tile.rot_90();
+        tilemap.insert(Direction::DownLeft.to_string(), tile.clone());
+        tile = tile.rot_90();
+        tilemap.insert(Direction::UpLeft.to_string(), tile.clone());
+
         Self {
             tileset: Tileset {
                 tile_size: size as usize,
                 tiles: tilemap,
             },
             direction: default_direction,
+        }
+    }
+
+    pub fn update_direction(&mut self, dx: f32, dy: f32) {
+        if dx != 0.0 || dy != 0.0 {
+            let angle = dy.atan2(dx).to_degrees();
+            self.direction = match angle as i32 {
+                -22..=22 => Direction::Right,
+                23..=67 => Direction::DownRight,
+                68..=112 => Direction::Down,
+                113..=157 => Direction::DownLeft,
+                158..=180 | -180..=-158 => Direction::Left,
+                -157..=-113 => Direction::UpLeft,
+                -112..=-68 => Direction::Up,
+                -67..=-23 => Direction::UpRight,
+                _ => self.direction,
+            }
         }
     }
 

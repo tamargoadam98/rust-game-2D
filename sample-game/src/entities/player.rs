@@ -14,7 +14,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(x: f32, y: f32, speed: f32, box_size: f32, tile: Tile) -> Self {
+    pub fn new(x: f32, y: f32, speed: f32, box_size: f32, sprite: Tile, sprite_diag: Tile) -> Self {
         Self {
             actor: Actor {
                 id: Self::next_id(),
@@ -23,36 +23,33 @@ impl Player {
                 speed,
                 box_size,
             },
-            sprite: DirectionalSprite::new(tile, box_size, Direction::Up),
+            sprite: DirectionalSprite::new(sprite, sprite_diag, box_size, Direction::Up),
         }
     }
 
     pub fn update(&mut self, ctx: &GameContext, entity_bounds: &[Bounds]) {
-        let mut x = self.actor.x;
-        let mut y = self.actor.y;
+        let mut dx = 0.0;
+        let mut dy = 0.0;
         let step = self.actor.speed * ctx.dt;
         if ctx.input.is_moving_left() {
-            x -= step;
-            self.sprite.direction = Direction::Left;
+            dx -= step;
         }
         if ctx.input.is_moving_right() {
-            x += step;
-            self.sprite.direction = Direction::Right;
+            dx += step;
         }
         if ctx.input.is_moving_up() {
-            y -= step;
-            self.sprite.direction = Direction::Up;
+            dy -= step;
         }
         if ctx.input.is_moving_down() {
-            y += step;
-            self.sprite.direction = Direction::Down;
+            dy += step;
         }
+        self.sprite.update_direction(dx, dy);
 
-        x = x.clamp(
+        let x = (self.x() + dx).clamp(
             self.actor.box_size / 2.0,
             ctx.config.width as f32 - self.actor.box_size / 2.0,
         );
-        y = y.clamp(
+        let y = (self.y() + dy).clamp(
             self.actor.box_size / 2.0,
             ctx.config.height as f32 - self.actor.box_size / 2.0,
         );

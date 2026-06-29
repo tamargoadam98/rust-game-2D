@@ -13,7 +13,9 @@
         "tile_size": 32,
         "tile_configs": [
             { "name": "player", "x": 0, "y": 0 },
-            { "name": "enemy", "x": 1, "y": 0 }
+            { "name": "enemy", "x": 1, "y": 0 },
+            { "name": "player_diag", "x": 0, "y": 1 },
+            { "name": "enemy_diag", "x": 1, "y": 1 }
         ]
     }
 ]
