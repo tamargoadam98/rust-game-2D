@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use simple_engine::assets::tileset::{Tile, Tileset};
-use simple_engine::engine::renderer::Renderer;
+use simple_engine::engine::renderer::{BlendMode, Renderer};
 
 use crate::entities::direction::Direction;
 
@@ -70,6 +70,7 @@ impl DirectionalSprite {
             &tile.pixels,
             self.tileset.tile_size,
             self.tileset.tile_size,
+            BlendMode::Alpha,
         );
     }
 }

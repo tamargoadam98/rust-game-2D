@@ -1,10 +1,25 @@
 [
     {
         "id": "background",
-        "file": "assets/sheets/test.png",
+        "file": "assets/sheets/stars.png",
         "tile_size": 32,
         "tile_configs": [
-            { "name": "stars", "x": 0, "y": 0 }
+            { "name": "stars_0", "x": 0, "y": 0 },
+            { "name": "stars_1", "x": 1, "y": 0 },
+            { "name": "stars_2", "x": 2, "y": 0 },
+            { "name": "stars_3", "x": 3, "y": 0 },
+            { "name": "stars_4", "x": 0, "y": 1 },
+            { "name": "stars_5", "x": 1, "y": 1 },
+            { "name": "stars_6", "x": 2, "y": 1 },
+            { "name": "stars_7", "x": 3, "y": 1 },
+            { "name": "stars_8", "x": 0, "y": 2 },
+            { "name": "stars_9", "x": 1, "y": 2 },
+            { "name": "stars_10", "x": 2, "y": 2 },
+            { "name": "stars_11", "x": 3, "y": 2 },
+            { "name": "stars_12", "x": 0, "y": 3 },
+            { "name": "stars_13", "x": 1, "y": 3 },
+            { "name": "stars_14", "x": 2, "y": 3 },
+            { "name": "stars_15", "x": 3, "y": 3 }
         ]
     },
     {

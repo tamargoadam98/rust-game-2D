@@ -77,7 +77,6 @@ impl<G: Game> ApplicationHandler for App<G> {
                 self.game.update(&ctx);
 
                 if let Some(renderer) = self.renderer.as_mut() {
-                    renderer.clear(color::BLACK);
                     self.game.draw(renderer);
                     renderer.present();
                 }

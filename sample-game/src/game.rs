@@ -17,7 +17,11 @@ pub struct MyGame {
 
 impl MyGame {
     pub fn new(config: Config) -> Self {
-        let mut tileset_manager = TilesetManager::new("assets/sheets/config.json", 64);
+        let max_background_tiles_across = 16;
+        let mut tileset_manager = TilesetManager::new(
+            "assets/sheets/config.json",
+            (config.width / max_background_tiles_across).next_multiple_of(64),
+        );
         // Fetch background tile map
         let tileset = tileset_manager.tilesets.remove("background").unwrap();
         let tile_size = tileset.tile_size;
@@ -26,7 +30,7 @@ impl MyGame {
             config.width / tile_size + 1,
             config.height / tile_size + 1,
         );
-        tilemap.fill("stars");
+        tilemap.fill_rand();
 
         // Fetch sprite sheet
         let mut spritesheet = tileset_manager.tilesets.remove("ships").unwrap();
@@ -40,7 +44,7 @@ impl MyGame {
             (config.width / 2) as f32,
             (config.height / 2) as f32,
             ActorConfig {
-                max_speed: 250.0,
+                max_speed: 350.0,
                 acceleration: 800.0,
                 deceleration: 8.0,
                 box_size: 128.0,
@@ -49,7 +53,7 @@ impl MyGame {
             player_sprite_diag,
         );
         let enemy_config = ActorConfig {
-            max_speed: 150.0,
+            max_speed: 200.0,
             acceleration: 900.0,
             deceleration: 1.0,
             box_size: 64.0,

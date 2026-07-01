@@ -29,19 +29,14 @@ impl Enemy {
         ctx: &GameContext,
         entity_bounds: &[Bounds],
     ) {
-        let mut dx = 0.0;
-        let mut dy = 0.0;
-
-        if player_x < self.actor.x - 5.0 {
-            dx -= 1.0;
-        } else if player_x > self.actor.x + 5.0 {
-            dx += 1.0;
-        }
-        if player_y < self.actor.y - 5.0 {
-            dy -= 1.0;
-        } else if player_y > self.actor.y + 5.0 {
-            dy += 1.0;
-        }
+        let diff_x = player_x - self.actor.x;
+        let diff_y = player_y - self.actor.y;
+        let dist = (diff_x * diff_x + diff_y * diff_y).sqrt();
+        let (dx, dy) = if dist > 5.0 {
+            (diff_x / dist, diff_y / dist)
+        } else {
+            (0.0, 0.0)
+        };
 
         self.actor.apply_input(dx, dy, ctx.dt);
         self.sprite.update_direction(self.actor.vx, self.actor.vy);

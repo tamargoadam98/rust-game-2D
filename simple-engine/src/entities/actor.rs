@@ -56,7 +56,11 @@ impl Actor {
         } else {
             self.vy *= drag;
         }
-        self.vx = self.vx.clamp(-self.max_speed, self.max_speed);
-        self.vy = self.vy.clamp(-self.max_speed, self.max_speed);
+        let speed = (self.vx * self.vx + self.vy * self.vy).sqrt();
+        if speed > self.max_speed {
+            let scale = self.max_speed / speed;
+            self.vx *= scale;
+            self.vy *= scale;
+        }
     }
 }

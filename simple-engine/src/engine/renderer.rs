@@ -4,6 +4,11 @@ pub trait Renderable {
     fn draw(&self, renderer: &mut Renderer);
 }
 
+pub enum BlendMode {
+    Opaque,
+    Alpha,
+}
+
 pub struct Renderer {
     pixels: Pixels<'static>,
     pub width: usize,
@@ -29,36 +34,18 @@ impl Renderer {
         }
     }
 
-    /// Draws a pixel blended over whatever is already in the buffer.
-    /// Uses standard "src over dst" alpha compositing:
-    ///   out = (src * a + dst * (255 - a)) / 255
-    pub fn draw_pixel_rgba(&mut self, x: usize, y: usize, r: u8, g: u8, b: u8, a: u8) {
-        if a == 0 || x >= self.width || y >= self.height {
-            return;
-        }
-        let i = (y * self.width + x) * 4;
-        let frame = self.pixels.frame_mut();
-        if a == 255 {
-            frame[i] = r;
-            frame[i + 1] = g;
-            frame[i + 2] = b;
-            frame[i + 3] = 0xff;
-        } else {
-            let a = a as u32;
-            let inv = 255 - a;
-            frame[i] = ((r as u32 * a + frame[i] as u32 * inv) / 255) as u8;
-            frame[i + 1] = ((g as u32 * a + frame[i + 1] as u32 * inv) / 255) as u8;
-            frame[i + 2] = ((b as u32 * a + frame[i + 2] as u32 * inv) / 255) as u8;
-            frame[i + 3] = 0xff;
-        }
+    pub fn blit_pixels(
+        &mut self,
+        x: usize,
+        y: usize,
+        pixels: &[u8],
+        width: usize,
+        height: usize,
+        blend: BlendMode,
+    ) {
+        self.blit_raw(x as i32, y as i32, width, height, pixels, blend);
     }
 
-    /// Blits an RGBA pixel buffer with `(x, y)` as the top-left corner.
-    pub fn blit_pixels(&mut self, x: usize, y: usize, pixels: &[u8], width: usize, height: usize) {
-        self.blit_raw(x as i32, y as i32, width, height, pixels);
-    }
-
-    /// Blits an RGBA pixel buffer centered on `(x, y)`.
     pub fn blit_pixels_centered(
         &mut self,
         x: usize,
@@ -66,29 +53,83 @@ impl Renderer {
         pixels: &[u8],
         width: usize,
         height: usize,
+        blend: BlendMode,
     ) {
         let start_x = x as i32 - (width / 2) as i32;
         let start_y = y as i32 - (height / 2) as i32;
-        self.blit_raw(start_x, start_y, width, height, pixels);
+        self.blit_raw(start_x, start_y, width, height, pixels, blend);
     }
 
-    fn blit_raw(&mut self, start_x: i32, start_y: i32, width: usize, height: usize, pixels: &[u8]) {
-        let mut i = 0;
-        for row in 0..height as i32 {
-            for col in 0..width as i32 {
-                let x = start_x + col;
-                let y = start_y + row;
-                if x >= 0 && y >= 0 {
-                    self.draw_pixel_rgba(
-                        x as usize,
-                        y as usize,
-                        pixels[i],
-                        pixels[i + 1],
-                        pixels[i + 2],
-                        pixels[i + 3],
-                    );
+    fn clip(
+        &self,
+        start_x: i32,
+        start_y: i32,
+        width: usize,
+        height: usize,
+    ) -> Option<(usize, usize, usize, usize)> {
+        let row_start = (-start_y).max(0) as usize;
+        let row_end = height.min((self.height as i32 - start_y).max(0) as usize);
+        let col_start = (-start_x).max(0) as usize;
+        let col_end = width.min((self.width as i32 - start_x).max(0) as usize);
+        (col_start < col_end && row_start < row_end)
+            .then_some((row_start, row_end, col_start, col_end))
+    }
+
+    fn blit_raw(
+        &mut self,
+        start_x: i32,
+        start_y: i32,
+        width: usize,
+        height: usize,
+        pixels: &[u8],
+        blend: BlendMode,
+    ) {
+        let Some((row_start, row_end, col_start, col_end)) =
+            self.clip(start_x, start_y, width, height)
+        else {
+            return;
+        };
+        let frame = self.pixels.frame_mut();
+        match blend {
+            BlendMode::Opaque => {
+                let dst_x = (start_x + col_start as i32) as usize;
+                let len = (col_end - col_start) * 4;
+                for row in row_start..row_end {
+                    let dst_y = (start_y + row as i32) as usize;
+                    let src_offset = (row * width + col_start) * 4;
+                    let dst_offset = (dst_y * self.width + dst_x) * 4;
+                    frame[dst_offset..dst_offset + len]
+                        .copy_from_slice(&pixels[src_offset..src_offset + len]);
                 }
-                i += 4;
+            }
+            BlendMode::Alpha => {
+                for row in row_start..row_end {
+                    let dst_y = (start_y + row as i32) as usize;
+                    for col in col_start..col_end {
+                        let dst_x = (start_x + col as i32) as usize;
+                        let src_i = (row * width + col) * 4;
+                        let dst_i = (dst_y * self.width + dst_x) * 4;
+                        let a = pixels[src_i + 3];
+                        if a == 255 {
+                            frame[dst_i] = pixels[src_i];
+                            frame[dst_i + 1] = pixels[src_i + 1];
+                            frame[dst_i + 2] = pixels[src_i + 2];
+                            frame[dst_i + 3] = 0xff;
+                        } else if a > 0 {
+                            let a = a as u32;
+                            let inv = 255 - a;
+                            frame[dst_i] = ((pixels[src_i] as u32 * a + frame[dst_i] as u32 * inv)
+                                / 255) as u8;
+                            frame[dst_i + 1] = ((pixels[src_i + 1] as u32 * a
+                                + frame[dst_i + 1] as u32 * inv)
+                                / 255) as u8;
+                            frame[dst_i + 2] = ((pixels[src_i + 2] as u32 * a
+                                + frame[dst_i + 2] as u32 * inv)
+                                / 255) as u8;
+                            frame[dst_i + 3] = 0xff;
+                        }
+                    }
+                }
             }
         }
     }

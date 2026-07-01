@@ -9,3 +9,4 @@ pixels = "0.17"
 winit = "0.30"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+rand = "0.10"

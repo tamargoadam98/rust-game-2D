@@ -8,8 +8,8 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            width: 1280,
-            height: 800,
+            width: 2560,
+            height: 1600,
             title: "Simple Engine",
         }
     }

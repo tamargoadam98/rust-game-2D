@@ -1,6 +1,6 @@
 use crate::{
     assets::tileset::Tileset,
-    engine::renderer::{Renderable, Renderer},
+    engine::renderer::{BlendMode, Renderable, Renderer},
 };
 
 pub struct Tilemap {
@@ -36,6 +36,19 @@ impl Tilemap {
         }
     }
 
+    pub fn fill_rand(&mut self) {
+        use rand::seq::IndexedRandom;
+        let keys: Vec<String> = self.tileset.tiles.keys().cloned().collect();
+        let mut rng = rand::rng();
+        for row in &mut self.tilemap {
+            for tile in row {
+                if let Some(id) = keys.choose(&mut rng) {
+                    *tile = id.clone();
+                }
+            }
+        }
+    }
+
     pub fn get_tile(&self, x: usize, y: usize) -> &str {
         &self.tilemap[y][x]
     }
@@ -55,6 +68,7 @@ impl Renderable for Tilemap {
                         &tile.pixels,
                         self.tileset.tile_size,
                         self.tileset.tile_size,
+                        BlendMode::Opaque,
                     );
                 }
             }
