@@ -29,22 +29,12 @@ impl Enemy {
         ctx: &GameContext,
         entity_bounds: &[Bounds],
     ) {
-        let diff_x = player_x - self.actor.x;
-        let diff_y = player_y - self.actor.y;
-        let dist = (diff_x * diff_x + diff_y * diff_y).sqrt();
-        let (dx, dy) = if dist > 5.0 {
-            (diff_x / dist, diff_y / dist)
-        } else {
-            (0.0, 0.0)
-        };
-
+        let (dx, dy) = self.calc_deltas(player_x, player_y);
         self.actor.apply_input(dx, dy, ctx.dt);
         self.sprite.update_direction(self.actor.vx, self.actor.vy);
 
-        let x = (self.x() + self.actor.vx * ctx.dt)
-            .clamp(0.0, ctx.config.width as f32 - self.actor.box_size);
-        let y = (self.y() + self.actor.vy * ctx.dt)
-            .clamp(self.actor.box_size, ctx.config.height as f32);
+        let x = self.x() + self.actor.vx * ctx.dt;
+        let y = self.y() + self.actor.vy * ctx.dt;
 
         let new_bounds = Bounds::new(
             self.actor.id,
@@ -56,6 +46,17 @@ impl Enemy {
         if !new_bounds.check_collisions(entity_bounds) {
             self.actor.x = x;
             self.actor.y = y;
+        }
+    }
+
+    fn calc_deltas(&self, player_x: f32, player_y: f32) -> (f32, f32) {
+        let diff_x = player_x - self.actor.x;
+        let diff_y = player_y - self.actor.y;
+        let dist = (diff_x * diff_x + diff_y * diff_y).sqrt();
+        if dist > 5.0 {
+            (diff_x / dist, diff_y / dist)
+        } else {
+            (0.0, 0.0)
         }
     }
 
@@ -78,8 +79,8 @@ impl Renderable for Enemy {
     fn draw(&self, renderer: &mut Renderer) {
         self.sprite.draw(
             renderer,
-            self.actor.x.round() as usize,
-            self.actor.y.round() as usize,
+            self.actor.x.round() as i32,
+            self.actor.y.round() as i32,
         );
     }
 }

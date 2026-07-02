@@ -58,7 +58,7 @@ impl DirectionalSprite {
         }
     }
 
-    pub fn draw(&self, renderer: &mut Renderer, x: usize, y: usize) {
+    pub fn draw(&self, renderer: &mut Renderer, x: i32, y: i32) {
         let tile = self
             .tileset
             .tiles

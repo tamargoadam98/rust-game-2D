@@ -1,5 +1,7 @@
 use pixels::Pixels;
 
+use crate::engine::camera::Camera;
+
 pub trait Renderable {
     fn draw(&self, renderer: &mut Renderer);
 }
@@ -11,14 +13,21 @@ pub enum BlendMode {
 
 pub struct Renderer {
     pixels: Pixels<'static>,
+    pub(crate) camera: Camera,
     pub width: usize,
     pub height: usize,
 }
 
 impl Renderer {
-    pub(crate) fn new(pixels: Pixels<'static>, width: usize, height: usize) -> Self {
+    pub(crate) fn new(
+        pixels: Pixels<'static>,
+        camera: Camera,
+        width: usize,
+        height: usize,
+    ) -> Self {
         Self {
             pixels,
+            camera,
             width,
             height,
         }
@@ -36,28 +45,35 @@ impl Renderer {
 
     pub fn blit_pixels(
         &mut self,
-        x: usize,
-        y: usize,
+        x: i32,
+        y: i32,
         pixels: &[u8],
         width: usize,
         height: usize,
         blend: BlendMode,
     ) {
-        self.blit_raw(x as i32, y as i32, width, height, pixels, blend);
+        self.blit_raw(x, y, width, height, pixels, blend);
     }
 
     pub fn blit_pixels_centered(
         &mut self,
-        x: usize,
-        y: usize,
+        x: i32,
+        y: i32,
         pixels: &[u8],
         width: usize,
         height: usize,
         blend: BlendMode,
     ) {
-        let start_x = x as i32 - (width / 2) as i32;
-        let start_y = y as i32 - (height / 2) as i32;
-        self.blit_raw(start_x, start_y, width, height, pixels, blend);
+        let start_x = x - (width / 2) as i32;
+        let start_y = y - (height / 2) as i32;
+        self.blit_raw(
+            start_x - self.camera.x,
+            start_y - self.camera.y,
+            width,
+            height,
+            pixels,
+            blend,
+        );
     }
 
     fn clip(
@@ -132,6 +148,11 @@ impl Renderer {
                 }
             }
         }
+    }
+
+    pub fn set_camera(&mut self, x: i32, y: i32) {
+        self.camera.x = x;
+        self.camera.y = y;
     }
 
     pub(crate) fn present(&mut self) {

@@ -52,22 +52,42 @@ impl Tilemap {
     pub fn get_tile(&self, x: usize, y: usize) -> &str {
         &self.tilemap[y][x]
     }
+
+    fn scroll_start_and_offset(camera_pos: i32, tile_size: i32, map_len: i32) -> (usize, i32) {
+        let start = camera_pos.div_euclid(tile_size).rem_euclid(map_len) as usize;
+        let offset = camera_pos.rem_euclid(tile_size);
+        (start, offset)
+    }
 }
 
 impl Renderable for Tilemap {
     fn draw(&self, renderer: &mut Renderer) {
+        let tile_size = self.tileset.tile_size;
+        let (x_start, off_x) = Self::scroll_start_and_offset(
+            renderer.camera.x,
+            tile_size as i32,
+            self.tilemap[0].len() as i32,
+        );
+        let (y_start, off_y) = Self::scroll_start_and_offset(
+            renderer.camera.y,
+            tile_size as i32,
+            self.tilemap.len() as i32,
+        );
+
         for y in 0..self.tilemap.len() {
+            let y_mod = (y_start + y) % self.tilemap.len();
             for x in 0..self.tilemap[0].len() {
-                let tile_id = self.get_tile(x, y);
+                let x_mod = (x_start + x) % self.tilemap[0].len();
+                let tile_id = self.get_tile(x_mod, y_mod);
                 if !tile_id.is_empty()
                     && let Some(tile) = self.tileset.tiles.get(tile_id)
                 {
                     renderer.blit_pixels(
-                        x * self.tileset.tile_size,
-                        y * self.tileset.tile_size,
+                        (x * tile_size) as i32 - off_x,
+                        (y * tile_size) as i32 - off_y,
                         &tile.pixels,
-                        self.tileset.tile_size,
-                        self.tileset.tile_size,
+                        tile_size,
+                        tile_size,
                         BlendMode::Opaque,
                     );
                 }

@@ -1,3 +1,4 @@
+pub mod camera;
 pub mod color;
 pub mod config;
 pub mod game_context;
@@ -13,6 +14,8 @@ use winit::event::{ElementState, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, EventLoop};
 use winit::keyboard::{Key, NamedKey};
 use winit::window::{Window, WindowId};
+
+use crate::engine::camera::Camera;
 
 use self::config::Config;
 use self::game_context::GameContext;
@@ -51,7 +54,12 @@ impl<G: Game> ApplicationHandler for App<G> {
         let surface = SurfaceTexture::new(size.width, size.height, Arc::clone(&window));
         let pixels =
             Pixels::new(self.config.width as u32, self.config.height as u32, surface).unwrap();
-        self.renderer = Some(Renderer::new(pixels, self.config.width, self.config.height));
+        self.renderer = Some(Renderer::new(
+            pixels,
+            Camera::default(),
+            self.config.width,
+            self.config.height,
+        ));
         self.window = Some(window);
     }
 

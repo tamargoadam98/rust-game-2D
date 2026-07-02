@@ -40,14 +40,8 @@ impl Player {
         self.actor.apply_input(dx, dy, ctx.dt);
         self.sprite.update_direction(self.actor.vx, self.actor.vy);
 
-        let x = (self.x() + self.actor.vx * ctx.dt).clamp(
-            self.actor.box_size / 2.0,
-            ctx.config.width as f32 - self.actor.box_size / 2.0,
-        );
-        let y = (self.y() + self.actor.vy * ctx.dt).clamp(
-            self.actor.box_size / 2.0,
-            ctx.config.height as f32 - self.actor.box_size / 2.0,
-        );
+        let x = self.x() + self.actor.vx * ctx.dt;
+        let y = self.y() + self.actor.vy * ctx.dt;
 
         let new_bounds = Bounds::new(
             self.actor.id,
@@ -81,8 +75,8 @@ impl Renderable for Player {
     fn draw(&self, renderer: &mut Renderer) {
         self.sprite.draw(
             renderer,
-            self.actor.x.round() as usize,
-            self.actor.y.round() as usize,
+            self.actor.x.round() as i32,
+            self.actor.y.round() as i32,
         );
     }
 }

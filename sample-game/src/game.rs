@@ -2,6 +2,7 @@ use crate::entities::enemy::Enemy;
 use crate::entities::player::Player;
 use simple_engine::assets::tileset_manager::TilesetManager;
 use simple_engine::engine::Game;
+use simple_engine::engine::camera::Camera;
 use simple_engine::engine::config::Config;
 use simple_engine::engine::game_context::GameContext;
 use simple_engine::engine::renderer::{Renderable, Renderer};
@@ -13,6 +14,7 @@ pub struct MyGame {
     tilemap: Tilemap,
     player: Player,
     enemies: Vec<Enemy>,
+    camera: Camera,
 }
 
 impl MyGame {
@@ -44,7 +46,7 @@ impl MyGame {
             (config.width / 2) as f32,
             (config.height / 2) as f32,
             ActorConfig {
-                max_speed: 350.0,
+                max_speed: 500.0,
                 acceleration: 800.0,
                 deceleration: 8.0,
                 box_size: 128.0,
@@ -53,10 +55,10 @@ impl MyGame {
             player_sprite_diag,
         );
         let enemy_config = ActorConfig {
-            max_speed: 200.0,
-            acceleration: 900.0,
+            max_speed: 400.0,
+            acceleration: 200.0,
             deceleration: 1.0,
-            box_size: 64.0,
+            box_size: 96.0,
         };
         let enemies = vec![
             Enemy::new(
@@ -69,12 +71,7 @@ impl MyGame {
             Enemy::new(
                 (config.width - 25) as f32,
                 0.0,
-                ActorConfig {
-                    max_speed: 100.0,
-                    acceleration: 200.0,
-                    deceleration: 2.0,
-                    box_size: 64.0,
-                },
+                enemy_config,
                 enemy_sprite,
                 enemy_sprite_diag,
             ),
@@ -84,7 +81,17 @@ impl MyGame {
             tilemap,
             player,
             enemies,
+            camera: Camera::new(300.0),
         }
+    }
+
+    fn update_camera(&mut self, ctx: &GameContext) {
+        self.camera.follow(
+            self.player.x(),
+            self.player.y(),
+            ctx.config.width as f32,
+            ctx.config.height as f32,
+        );
     }
 }
 
@@ -98,9 +105,11 @@ impl Game for MyGame {
         for enemy in &mut self.enemies {
             enemy.update(self.player.x(), self.player.y(), ctx, &entity_bounds);
         }
+        self.update_camera(ctx);
     }
 
     fn draw(&self, renderer: &mut Renderer) {
+        renderer.set_camera(self.camera.x, self.camera.y);
         self.tilemap.draw(renderer);
         self.player.draw(renderer);
         for enemy in &self.enemies {

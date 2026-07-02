@@ -1,5 +1,6 @@
 use crate::entities::bounds::Bounds;
 
+#[derive(Copy, Clone)]
 pub struct ActorConfig {
     pub max_speed: f32,
     pub acceleration: f32,
