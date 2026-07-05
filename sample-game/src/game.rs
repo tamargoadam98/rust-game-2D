@@ -29,8 +29,8 @@ impl MyGame {
         let tile_size = tileset.tile_size;
         let mut tilemap = Tilemap::new(
             tileset,
-            config.width / tile_size + 1,
-            config.height / tile_size + 1,
+            config.width.div_ceil(tile_size) + 1,
+            config.height.div_ceil(tile_size) + 1,
         );
         tilemap.fill_rand();
 
