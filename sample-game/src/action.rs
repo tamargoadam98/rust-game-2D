@@ -3,6 +3,7 @@ pub enum Action {
     MoveRight,
     MoveUp,
     MoveDown,
+    Boost,
     Exit,
 }
 
@@ -13,6 +14,7 @@ impl Action {
             Action::MoveRight => "move_right",
             Action::MoveUp => "move_up",
             Action::MoveDown => "move_down",
+            Action::Boost => "boost",
             Action::Exit => "exit",
         }
     }
