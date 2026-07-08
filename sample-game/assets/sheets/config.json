@@ -32,5 +32,29 @@
             { "name": "player_diag", "x": 0, "y": 1 },
             { "name": "enemy_diag", "x": 1, "y": 1 }
         ]
+    },
+    {
+        "id": "ui_elements",
+        "file": "assets/sheets/ui_elements.png",
+        "tile_size": 16,
+        "tile_configs": [
+            { "name": "boost_bar_0", "x": 0, "y": 0 },
+            { "name": "boost_bar_1", "x": 1, "y": 0 },
+            { "name": "boost_bar_2", "x": 2, "y": 0 },
+            { "name": "boost_bar_3", "x": 3, "y": 0 },
+            { "name": "boost_bar_4", "x": 4, "y": 0 },
+            { "name": "boost_bar_5", "x": 5, "y": 0 },
+            { "name": "boost_bar_6", "x": 6, "y": 0 },
+            { "name": "boost_bar_7", "x": 7, "y": 0 },
+            { "name": "fuel_bar_0", "x": 0, "y": 1 },
+            { "name": "fuel_bar_1", "x": 1, "y": 1 },
+            { "name": "fuel_bar_2", "x": 2, "y": 1 },
+            { "name": "fuel_bar_3", "x": 3, "y": 1 },
+            { "name": "fuel_bar_4", "x": 4, "y": 1 },
+            { "name": "fuel_bar_5", "x": 5, "y": 1 },
+            { "name": "fuel_bar_6", "x": 6, "y": 1 },
+            { "name": "fuel_bar_7", "x": 7, "y": 1 }
+
+        ]
     }
 ]

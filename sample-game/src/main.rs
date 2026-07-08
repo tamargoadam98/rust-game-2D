@@ -1,6 +1,7 @@
 mod action;
 mod entities;
 mod game;
+mod ui;
 
 use crate::action::Action;
 use crate::game::MyGame;

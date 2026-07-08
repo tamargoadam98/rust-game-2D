@@ -89,6 +89,10 @@ impl Player {
         (dx, dy)
     }
 
+    pub fn get_boost_percentage(&self) -> f32 {
+        self.boost / Self::MAX_BOOST
+    }
+
     pub fn x(&self) -> f32 {
         self.actor.x
     }

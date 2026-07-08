@@ -26,6 +26,7 @@ use self::renderer::Renderer;
 pub trait Game {
     fn update(&mut self, ctx: &GameContext);
     fn draw(&self, renderer: &mut Renderer);
+    fn draw_ui(&self, renderer: &mut Renderer);
 }
 
 struct App<G: Game> {
@@ -88,6 +89,7 @@ impl<G: Game> ApplicationHandler for App<G> {
 
                 if let Some(renderer) = self.renderer.as_mut() {
                     self.game.draw(renderer);
+                    self.game.draw_ui(renderer);
                     renderer.present();
                 }
             }
