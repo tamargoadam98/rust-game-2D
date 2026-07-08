@@ -5,6 +5,7 @@ use simple_engine::entities::actor::{Actor, ActorConfig};
 use simple_engine::entities::bounds::Bounds;
 use simple_engine::entities::entity::Entity;
 
+use crate::action::Action;
 use crate::entities::direction::Direction;
 use crate::entities::directional_sprite::DirectionalSprite;
 
@@ -26,14 +27,14 @@ impl Player {
         let mut dx = 0.0;
         let mut dy = 0.0;
 
-        if ctx.input.is_moving_left() {
+        if ctx.input.is_active(Action::MoveLeft.as_str()) {
             dx -= 1.0;
-        } else if ctx.input.is_moving_right() {
+        } else if ctx.input.is_active(Action::MoveRight.as_str()) {
             dx += 1.0;
         }
-        if ctx.input.is_moving_up() {
+        if ctx.input.is_active(Action::MoveUp.as_str()) {
             dy -= 1.0;
-        } else if ctx.input.is_moving_down() {
+        } else if ctx.input.is_active(Action::MoveDown.as_str()) {
             dy += 1.0;
         }
 

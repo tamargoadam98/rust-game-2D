@@ -2,7 +2,8 @@ pub mod camera;
 pub mod color;
 pub mod config;
 pub mod game_context;
-pub mod input;
+pub mod key;
+pub mod key_state;
 pub mod renderer;
 
 use std::sync::Arc;
@@ -12,14 +13,14 @@ use pixels::{Pixels, SurfaceTexture};
 use winit::application::ApplicationHandler;
 use winit::event::{ElementState, WindowEvent};
 use winit::event_loop::{ActiveEventLoop, EventLoop};
-use winit::keyboard::{Key, NamedKey};
 use winit::window::{Window, WindowId};
 
 use crate::engine::camera::Camera;
 
 use self::config::Config;
 use self::game_context::GameContext;
-use self::input::Input;
+use self::key::Key;
+use self::key_state::KeyState;
 use self::renderer::Renderer;
 
 pub trait Game {
@@ -30,7 +31,7 @@ pub trait Game {
 struct App<G: Game> {
     config: Config,
     game: G,
-    input: Input,
+    input: KeyState,
     last_frame: Instant,
     window: Option<Arc<Window>>,
     renderer: Option<Renderer>,
@@ -67,13 +68,14 @@ impl<G: Game> ApplicationHandler for App<G> {
         match event {
             WindowEvent::CloseRequested => event_loop.exit(),
             WindowEvent::KeyboardInput { event, .. } => {
-                if event.logical_key == Key::Named(NamedKey::Escape) {
-                    event_loop.exit();
-                    return;
+                if let Some(key) = Key::from_winit(&event.logical_key) {
+                    match event.state {
+                        ElementState::Pressed => self.input.key_down(key),
+                        ElementState::Released => self.input.key_up(key),
+                    }
                 }
-                match event.state {
-                    ElementState::Pressed => self.input.key_down(&event.logical_key),
-                    ElementState::Released => self.input.key_up(&event.logical_key),
+                if self.input.is_active("exit") {
+                    event_loop.exit();
                 }
             }
             WindowEvent::RedrawRequested => {
@@ -100,12 +102,12 @@ impl<G: Game> ApplicationHandler for App<G> {
     }
 }
 
-pub fn run(config: Config, game: impl Game) {
+pub fn run(config: Config, input: KeyState, game: impl Game) {
     let event_loop = EventLoop::new().unwrap();
     let mut app = App {
         config,
         game,
-        input: Input::new(),
+        input,
         last_frame: Instant::now(),
         window: None,
         renderer: None,
