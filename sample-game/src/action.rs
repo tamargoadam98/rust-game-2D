@@ -4,6 +4,7 @@ pub enum Action {
     MoveUp,
     MoveDown,
     Boost,
+    Shoot,
     Exit,
 }
 
@@ -15,6 +16,7 @@ impl Action {
             Action::MoveUp => "move_up",
             Action::MoveDown => "move_down",
             Action::Boost => "boost",
+            Action::Shoot => "shoot",
             Action::Exit => "exit",
         }
     }

@@ -5,6 +5,7 @@ use simple_engine::engine::renderer::{BlendMode, Renderer};
 
 use crate::entities::direction::Direction;
 
+#[derive(Clone)]
 pub struct DirectionalSprite {
     tileset: Tileset,
     pub direction: Direction,
@@ -14,7 +15,7 @@ impl DirectionalSprite {
     pub fn new(sprite: Tile, sprite_diag: Tile, size: f32, default_direction: Direction) -> Self {
         let mut tilemap = HashMap::new();
         // Get cardinal direstions
-        let mut tile = sprite.scale(size as u32);
+        let mut tile = sprite.scale_to_fit(size as u32);
         tilemap.insert(Direction::Up.to_string(), tile.clone());
         tile = tile.rot_90();
         tilemap.insert(Direction::Right.to_string(), tile.clone());
@@ -23,7 +24,7 @@ impl DirectionalSprite {
         tile = tile.rot_90();
         tilemap.insert(Direction::Left.to_string(), tile.clone());
         // Get diagonal directions
-        tile = sprite_diag.scale(size as u32);
+        tile = sprite_diag.scale_to_fit(size as u32);
         tilemap.insert(Direction::UpRight.to_string(), tile.clone());
         tile = tile.rot_90();
         tilemap.insert(Direction::DownRight.to_string(), tile.clone());
@@ -33,10 +34,7 @@ impl DirectionalSprite {
         tilemap.insert(Direction::UpLeft.to_string(), tile.clone());
 
         Self {
-            tileset: Tileset {
-                tile_size: size as usize,
-                tiles: tilemap,
-            },
+            tileset: Tileset { tiles: tilemap },
             direction: default_direction,
         }
     }
@@ -68,8 +66,8 @@ impl DirectionalSprite {
             x,
             y,
             &tile.pixels,
-            self.tileset.tile_size,
-            self.tileset.tile_size,
+            tile.width,
+            tile.height,
             BlendMode::Alpha,
         );
     }

@@ -28,11 +28,11 @@ impl Bounds {
     }
 
     pub fn check_collisions(&self, bounds_vec: &[Bounds]) -> bool {
-        for bounds in bounds_vec {
-            if self.is_collision(bounds) {
-                return true;
-            }
-        }
-        false
+        bounds_vec.iter().any(|b| self.is_collision(b))
+    }
+
+    /// Like `check_collisions`, but skips the entry with `exclude_id`.
+    pub fn check_collisions_excluding(&self, bounds_vec: &[Bounds], exclude_id: u32) -> bool {
+        bounds_vec.iter().any(|b| b.id != exclude_id && self.is_collision(b))
     }
 }

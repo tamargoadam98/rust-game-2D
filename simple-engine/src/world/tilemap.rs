@@ -6,13 +6,15 @@ use crate::{
 pub struct Tilemap {
     tileset: Tileset,
     tilemap: Vec<Vec<String>>,
+    tile_size: usize,
 }
 
 impl Tilemap {
-    pub fn new(tileset: Tileset, map_width: usize, map_height: usize) -> Self {
+    pub fn new(tileset: Tileset, tile_size: usize, map_width: usize, map_height: usize) -> Self {
         Self {
             tileset,
             tilemap: vec![vec![String::new(); map_width]; map_height],
+            tile_size,
         }
     }
 
@@ -62,7 +64,7 @@ impl Tilemap {
 
 impl Renderable for Tilemap {
     fn draw(&self, renderer: &mut Renderer) {
-        let tile_size = self.tileset.tile_size;
+        let tile_size = self.tile_size;
         let (x_start, off_x) = Self::scroll_start_and_offset(
             renderer.camera.x,
             tile_size as i32,

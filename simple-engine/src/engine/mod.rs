@@ -25,7 +25,9 @@ use self::renderer::Renderer;
 
 pub trait Game {
     fn update(&mut self, ctx: &GameContext);
+    /// Draw world-space objects. The camera transform is applied before this is called.
     fn draw(&self, renderer: &mut Renderer);
+    /// Draw screen-space UI. Called after `draw`; no camera transform is applied.
     fn draw_ui(&self, renderer: &mut Renderer);
 }
 

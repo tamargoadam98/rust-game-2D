@@ -8,6 +8,7 @@ use simple_engine::entities::entity::Entity;
 use crate::action::Action;
 use crate::entities::direction::Direction;
 use crate::entities::directional_sprite::DirectionalSprite;
+use crate::entities::laser::Laser;
 
 pub struct Player {
     actor: Actor,
@@ -15,26 +16,64 @@ pub struct Player {
     base_max_speed: f32,
     base_acceleration: f32,
     boost: f32,
+    laser: Laser,
+    shoot_cooldown: f32,
 }
 
 impl Player {
     const MAX_BOOST: f32 = 100.0;
     const BOOST_DRAIN: f32 = 50.0;
     const BOOST_REGEN: f32 = 25.0;
+    const SHOOT_COOLDOWN: f32 = 0.3;
 
-    pub fn new(x: f32, y: f32, config: ActorConfig, sprite: Tile, sprite_diag: Tile) -> Self {
+    pub fn new(
+        x: f32,
+        y: f32,
+        config: ActorConfig,
+        sprite: Tile,
+        sprite_diag: Tile,
+        laser_sprite: Tile,
+        laser_sprite_diag: Tile,
+    ) -> Self {
         let box_size = config.box_size;
+        let actor = Actor::new(Self::next_id(), x, y, config);
+        let owner_id = actor.id;
         Self {
-            actor: Actor::new(Self::next_id(), x, y, config),
+            actor,
             sprite: DirectionalSprite::new(sprite, sprite_diag, box_size, Direction::Up),
             base_max_speed: config.max_speed,
             base_acceleration: config.acceleration,
             boost: Self::MAX_BOOST,
+            laser: Self::build_laser(laser_sprite, laser_sprite_diag, owner_id),
+            shoot_cooldown: 0.0,
         }
     }
 
-    pub fn update(&mut self, ctx: &GameContext, entity_bounds: &[Bounds]) {
+    fn build_laser(sprite: Tile, sprite_diag: Tile, owner_bounds_id: u32) -> Laser {
+        let laser_config = ActorConfig {
+            max_speed: 1500.0,
+            acceleration: 1.0,
+            deceleration: 0.0,
+            box_size: 32.0,
+        };
+        Laser::new(
+            0.0,
+            0.0,
+            laser_config,
+            sprite,
+            sprite_diag,
+            Direction::Up,
+            2048.0,
+            owner_bounds_id,
+        )
+    }
+
+    /// Returns a newly spawned `Laser` if the player fired this frame, otherwise `None`.
+    pub fn update(&mut self, ctx: &GameContext, entity_bounds: &[Bounds]) -> Option<Laser> {
         self.update_boost(ctx);
+        self.shoot_cooldown = (self.shoot_cooldown - ctx.dt).max(0.0);
+
+        let laser = self.check_fire_laser(ctx);
 
         let (dx, dy) = self.get_direction_deltas(ctx);
 
@@ -55,6 +94,8 @@ impl Player {
             self.actor.x = x;
             self.actor.y = y;
         }
+
+        laser
     }
 
     fn update_boost(&mut self, ctx: &GameContext) {
@@ -70,6 +111,18 @@ impl Player {
             }
         }
         self.boost = self.boost.clamp(0.0, Self::MAX_BOOST);
+    }
+
+    fn check_fire_laser(&mut self, ctx: &GameContext) -> Option<Laser> {
+        if self.shoot_cooldown == 0.0 && ctx.input.is_active(Action::Shoot.as_str()) {
+            self.shoot_cooldown = Self::SHOOT_COOLDOWN;
+            let mut new_laser = self.laser.clone(); // todo: consider refactor to avoid need for deep copy
+            new_laser.set_direction(self.sprite.direction);
+            new_laser.set_position(self.x(), self.y());
+            Some(new_laser)
+        } else {
+            None
+        }
     }
 
     fn get_direction_deltas(&self, ctx: &GameContext) -> (f32, f32) {

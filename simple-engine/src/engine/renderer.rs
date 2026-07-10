@@ -43,6 +43,7 @@ impl Renderer {
         }
     }
 
+    /// Blits at screen coordinates `(x, y)` as the top-left corner. No camera transform applied.
     pub fn blit_pixels(
         &mut self,
         x: i32,
@@ -55,6 +56,7 @@ impl Renderer {
         self.blit_raw(x, y, width, height, pixels, blend);
     }
 
+    /// Blits at world coordinates `(x, y)` as the center point. Camera transform is applied.
     pub fn blit_pixels_centered(
         &mut self,
         x: i32,

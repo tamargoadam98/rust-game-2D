@@ -12,14 +12,12 @@ pub struct BoostBar {
 }
 
 impl BoostBar {
-    pub fn new(x: i32, y: i32, bar_tiles: [Tile; 8], fuel_tiles: [Tile; 8], size: u32) -> Self {
-        let scaled_bar_tiles: [Tile; 8] = std::array::from_fn(|i| bar_tiles[i].scale(size));
-        let scaled_fuel_tiles: [Tile; 8] = std::array::from_fn(|i| fuel_tiles[i].scale(size));
+    pub fn new(x: i32, y: i32, bar_tiles: [Tile; 8], fuel_tiles: [Tile; 8]) -> Self {
         Self {
             x,
             y,
-            boost_bar_tiles: scaled_bar_tiles,
-            fuel_tiles: scaled_fuel_tiles,
+            boost_bar_tiles: bar_tiles,
+            fuel_tiles,
             boost_percentage: 1.0,
         }
     }
@@ -33,11 +31,11 @@ impl Renderable for BoostBar {
     fn draw(&self, renderer: &mut Renderer) {
         for (i, tile) in self.boost_bar_tiles.iter().enumerate() {
             renderer.blit_pixels(
-                self.x + (tile.size * i) as i32,
+                self.x + (tile.width * i) as i32,
                 self.y,
                 &tile.pixels,
-                tile.size,
-                tile.size,
+                tile.width,
+                tile.height,
                 BlendMode::Alpha,
             )
         }
@@ -45,11 +43,11 @@ impl Renderable for BoostBar {
         for i in 0..fuel_bar_len {
             let tile = &self.fuel_tiles[i];
             renderer.blit_pixels(
-                self.x + (tile.size * i) as i32,
+                self.x + (tile.width * i) as i32,
                 self.y,
                 &tile.pixels,
-                tile.size,
-                tile.size,
+                tile.width,
+                tile.height,
                 BlendMode::Alpha,
             )
         }

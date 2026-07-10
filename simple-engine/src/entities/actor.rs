@@ -8,6 +8,7 @@ pub struct ActorConfig {
     pub box_size: f32,
 }
 
+#[derive(Clone)]
 pub struct Actor {
     pub id: u32,
     pub x: f32,
@@ -39,6 +40,8 @@ impl Actor {
         Bounds::new(self.id, self.x, self.y, self.box_size, self.box_size)
     }
 
+    /// Accelerates toward `(dx, dy)` (unit direction) and applies drag when no input is given.
+    /// Clamps the resulting velocity to `max_speed`.
     pub fn apply_input(&mut self, dx: f32, dy: f32, dt: f32) {
         let accel = self.acceleration * dt;
         let drag = (1.0 - self.deceleration * dt).max(0.0);
